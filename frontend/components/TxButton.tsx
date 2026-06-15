@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import type { Abi } from 'viem';
+import { toast } from 'sonner';
+import { Check } from 'lucide-react';
 import { txUrl } from '../lib/format';
 
 function parseError(err: unknown): string {
@@ -20,23 +22,37 @@ type Props = {
   disabled?: boolean;
   onConfirmed?: () => void;
   className?: string;
+  big?: boolean;
 };
 
-export default function TxButton({ label, address, abi, functionName, args, disabled, onConfirmed, className }: Props) {
+export default function TxButton({ label, address, abi, functionName, args, disabled, onConfirmed, className, big }: Props) {
   const queryClient = useQueryClient();
   const { writeContract, data: hash, isPending, error, reset } = useWriteContract();
   const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash });
   const handled = useRef<string | null>(null);
+  const errHandled = useRef<unknown>(null);
 
   useEffect(() => {
     if (isSuccess && hash && handled.current !== hash) {
       handled.current = hash;
       queryClient.invalidateQueries(); // refresh all on-chain reads + API queries
       onConfirmed?.();
+      toast.success(`${label} confirmed`, {
+        description: 'Your balances are up to date.',
+        action: { label: 'View tx', onClick: () => window.open(txUrl(hash), '_blank', 'noopener') },
+      });
     }
-  }, [isSuccess, hash, queryClient, onConfirmed]);
+  }, [isSuccess, hash, queryClient, onConfirmed, label]);
+
+  useEffect(() => {
+    if (error && errHandled.current !== error) {
+      errHandled.current = error;
+      toast.error('Transaction failed', { description: parseError(error) });
+    }
+  }, [error]);
 
   const busy = isPending || confirming;
+  const cls = className ?? `btn btn-primary${big ? ' btn-lg' : ''}`;
 
   return (
     <div>
@@ -46,34 +62,39 @@ export default function TxButton({ label, address, abi, functionName, args, disa
           writeContract({ address, abi, functionName, args });
         }}
         disabled={disabled || busy}
-        className={
-          className ??
-          'rounded bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50'
-        }
+        className={cls}
       >
-        {busy && (
-          <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent align-middle" />
+        {busy && <span className="spin" />}
+        {isPending ? (
+          'Confirm in wallet…'
+        ) : confirming ? (
+          'Confirming…'
+        ) : isSuccess ? (
+          <>
+            <Check size={16} /> Confirmed
+          </>
+        ) : (
+          label
         )}
-        {isPending ? 'Confirm in wallet…' : confirming ? 'Confirming…' : label}
       </button>
-      <div className="mt-1 min-h-5 text-xs">
+      <div className="xs" style={{ minHeight: 18, marginTop: 6 }}>
         {confirming && hash && (
-          <span className="text-slate-500">
-            Waiting for confirmation —{' '}
-            <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="text-indigo-600 underline">
+          <span className="dim">
+            Mining —{' '}
+            <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="link-tx">
               view tx
             </a>
           </span>
         )}
         {isSuccess && hash && (
-          <span className="text-green-600">
+          <span className="success-text">
             Confirmed ✓{' '}
-            <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="underline">
+            <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="link-tx" style={{ color: 'var(--success)' }}>
               view tx
             </a>
           </span>
         )}
-        {error && <span className="text-red-600">{parseError(error)}</span>}
+        {error && <span className="danger-text">{parseError(error)}</span>}
       </div>
     </div>
   );

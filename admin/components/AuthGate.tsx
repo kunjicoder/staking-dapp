@@ -3,32 +3,54 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { Shield, ArrowUpRight, LogOut } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { short } from '../lib/format';
+import Avatar from './Avatar';
+import ThemeToggle from './ThemeToggle';
+
+const NAV = [
+  { href: '/', label: 'Overview' },
+  { href: '/stakers', label: 'Stakers' },
+  { href: '/activity', label: 'Activity' },
+];
 
 function AdminHeader() {
   const { wallet, signOut } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-        <span className="text-lg font-bold text-indigo-700">STK Admin</span>
-        <nav className="flex gap-3 text-sm">
-          <Link href="/" className="text-slate-600 hover:text-indigo-700">Overview</Link>
-          <Link href="/stakers" className="text-slate-600 hover:text-indigo-700">Stakers</Link>
-          <Link href="/activity" className="text-slate-600 hover:text-indigo-700">Activity</Link>
-        </nav>
-        <div className="ml-auto flex items-center gap-2 text-sm">
-          <span className="font-mono text-slate-500">{short(wallet)}</span>
-          <button
-            onClick={() => {
-              signOut();
-              router.replace('/login');
-            }}
-            className="rounded border border-slate-300 px-3 py-1.5 text-slate-600 hover:bg-slate-50"
-          >
-            Sign out
-          </button>
+    <header className="hdr">
+      <div className="container container-admin">
+        <div className="hdr-inner">
+          <Link href="/" className="brand">
+            <span className="brand-mark">
+              <Shield size={14} style={{ color: 'var(--accent-contrast)' }} />
+            </span>
+            STK <span className="brand-sub">Admin</span>
+          </Link>
+          <nav className="nav">
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? 'active' : ''}`}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="hdr-right">
+            <ThemeToggle />
+            <span className="chip">
+              <Avatar addr={wallet} size={18} /> {short(wallet)}
+            </span>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => {
+                signOut();
+                router.replace('/login');
+              }}
+            >
+              <LogOut size={15} /> Sign out
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -46,14 +68,16 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     if (ready && !isLogin && !authed) router.replace('/login');
   }, [ready, isLogin, authed, router]);
 
-  if (isLogin) return <main className="mx-auto max-w-md px-4 py-16">{children}</main>;
+  if (isLogin) return <main>{children}</main>;
   if (!ready) return null;
   if (!authed) return null;
 
   return (
     <>
       <AdminHeader />
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="container container-admin" style={{ paddingTop: 40, paddingBottom: 64 }}>
+        {children}
+      </main>
     </>
   );
 }

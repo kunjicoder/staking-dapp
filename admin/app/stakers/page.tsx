@@ -1,8 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { Search, Copy, Check } from 'lucide-react';
 import { useAdminQuery } from '../../lib/useAdminQuery';
 import { fmt, short } from '../../lib/format';
+import Avatar from '../../components/Avatar';
 
 type Staker = {
   wallet: string;
@@ -22,10 +24,11 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1200);
       }}
-      className="ml-1 text-xs text-indigo-600 hover:underline"
+      className="btn btn-ghost btn-sm"
+      style={{ height: 24, padding: '0 6px', color: 'var(--dim)' }}
       title="Copy address"
     >
-      {copied ? 'copied ✓' : 'copy'}
+      {copied ? <Check size={13} className="success-text" /> : <Copy size={13} />}
     </button>
   );
 }
@@ -57,7 +60,7 @@ export default function StakersPage() {
     const active = sortKey === key;
     return (
       <th
-        className="cursor-pointer select-none px-4 py-3 hover:text-indigo-700"
+        className="sortable"
         onClick={() => {
           if (active) setSortDesc(!sortDesc);
           else {
@@ -66,36 +69,55 @@ export default function StakersPage() {
           }
         }}
       >
-        {label} {active ? (sortDesc ? '↓' : '↑') : ''}
+        {label}
+        {active && <span className="sort-ind">{sortDesc ? '↓' : '↑'}</span>}
       </th>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-2xl font-bold">Stakers</h1>
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search address…"
-          className="ml-auto w-72 rounded border border-slate-300 px-3 py-2 text-sm"
-        />
+    <div className="col fade-key" style={{ gap: 24 }}>
+      <div className="row between wrap" style={{ alignItems: 'flex-end' }}>
+        <div className="col" style={{ gap: 6 }}>
+          <span className="eyebrow">Console</span>
+          <h1 className="section-title">Stakers</h1>
+        </div>
+        <div style={{ position: 'relative', width: 'min(320px, 100%)' }}>
+          <Search size={16} style={{ position: 'absolute', left: 12, top: 11, color: 'var(--dim)' }} />
+          <input
+            className="input input-sm"
+            style={{ paddingLeft: 36 }}
+            placeholder="Search address…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
-      {isLoading && <p className="text-slate-500">Loading (reading balances on-chain)…</p>}
-      {error && <p className="text-red-600">Failed to load stakers.</p>}
-      {!isLoading && !error && rows.length === 0 && (
-        <p className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
-          {search ? 'No wallets match that search.' : 'No wallets seen yet.'}
-        </p>
-      )}
+      <div className="row xs dim" style={{ gap: 12 }}>
+        <span>{rows.length} wallets</span>
+        <span>· balances read on-chain</span>
+      </div>
 
-      {rows.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-sm">
+      {error && <div className="banner danger">Failed to load stakers.</div>}
+
+      {isLoading ? (
+        <div className="tbl-wrap" style={{ padding: 16 }}>
+          <div className="col" style={{ gap: 12 }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="skel" style={{ height: 18 }} />
+            ))}
+          </div>
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="empty">
+          <div className="small">{search ? 'No wallets match that search.' : 'No wallets seen yet.'}</div>
+        </div>
+      ) : (
+        <div className="tbl-wrap">
+          <table className="tbl">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr>
                 {header('wallet', 'Address')}
                 {header('tokenBalance', 'Token balance')}
                 {header('stakedBalance', 'Staked')}
@@ -104,21 +126,19 @@ export default function StakersPage() {
             </thead>
             <tbody>
               {rows.map((s) => (
-                <tr key={s.wallet} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 font-mono text-xs">
-                    <a
-                      href={`https://sepolia.etherscan.io/address/${s.wallet}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="hover:underline"
-                    >
-                      {short(s.wallet)}
-                    </a>
-                    <CopyButton text={s.wallet} />
+                <tr key={s.wallet}>
+                  <td>
+                    <span className="row" style={{ gap: 8 }}>
+                      <Avatar addr={s.wallet} size={20} />
+                      <a className="mono xs" style={{ textDecoration: 'none' }} href={`https://sepolia.etherscan.io/address/${s.wallet}`} target="_blank" rel="noreferrer">
+                        {short(s.wallet)}
+                      </a>
+                      <CopyButton text={s.wallet} />
+                    </span>
                   </td>
-                  <td className="px-4 py-2">{fmt(s.tokenBalance)} STK</td>
-                  <td className="px-4 py-2">{fmt(s.stakedBalance)} STK</td>
-                  <td className="px-4 py-2 text-green-700">{fmt(s.pendingRewards)} STK</td>
+                  <td className="td-amt">{fmt(s.tokenBalance)} STK</td>
+                  <td className="td-amt">{fmt(s.stakedBalance)} STK</td>
+                  <td className="td-amt success-text">{fmt(s.pendingRewards, 6)} STK</td>
                 </tr>
               ))}
             </tbody>
