@@ -69,10 +69,12 @@ All API amounts are raw 18-decimal uint256 values serialized as strings; fronten
 
 ## Deployed addresses
 
+Both contracts are **verified** on Sepolia Etherscan (source is browsable under the **Contract → Code** tab).
+
 | What | Value |
 | --- | --- |
-| StakeToken (Sepolia) | [`0x8D8450F9a785167dCbE2595475D5c03f0E850cf7`](https://sepolia.etherscan.io/address/0x8D8450F9a785167dCbE2595475D5c03f0E850cf7) |
-| Staking (Sepolia) | [`0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C`](https://sepolia.etherscan.io/address/0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C) |
+| StakeToken (Sepolia) | [`0x8D8450F9a785167dCbE2595475D5c03f0E850cf7`](https://sepolia.etherscan.io/address/0x8D8450F9a785167dCbE2595475D5c03f0E850cf7#code) |
+| Staking (Sepolia) | [`0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C`](https://sepolia.etherscan.io/address/0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C#code) |
 | Deploy block | `11044588` |
 
 ## Live URLs

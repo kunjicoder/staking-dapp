@@ -11,10 +11,12 @@ Event signatures consumed by the backend indexer: `Staked`, `Unstaked`, `Claimed
 
 ## Deployed addresses (Sepolia)
 
+Both contracts are **verified** on Etherscan — source is browsable under the **Contract → Code** tab.
+
 | Contract | Address |
 | --- | --- |
-| StakeToken | [`0x8D8450F9a785167dCbE2595475D5c03f0E850cf7`](https://sepolia.etherscan.io/address/0x8D8450F9a785167dCbE2595475D5c03f0E850cf7) |
-| Staking | [`0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C`](https://sepolia.etherscan.io/address/0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C) |
+| StakeToken | [`0x8D8450F9a785167dCbE2595475D5c03f0E850cf7`](https://sepolia.etherscan.io/address/0x8D8450F9a785167dCbE2595475D5c03f0E850cf7#code) |
+| Staking | [`0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C`](https://sepolia.etherscan.io/address/0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C#code) |
 
 Deploy block: `11044588`.
 
