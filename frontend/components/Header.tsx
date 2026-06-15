@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
+import { toast } from 'sonner';
 import { Layers, Wallet, AlertTriangle, Shield, ChevronDown, Lock, ExternalLink, LogOut } from 'lucide-react';
 import { short } from '../lib/format';
 import { useAuth, useSignIn } from '../lib/auth';
@@ -45,8 +46,11 @@ function WalletCluster() {
     setSigningIn(true);
     try {
       await signIn();
-    } catch {
-      /* surfaced by the auth flow; keep header quiet */
+      toast.success('Signed in');
+    } catch (err) {
+      toast.error('Sign-in failed', {
+        description: err instanceof Error ? err.message : 'Could not sign in — check the API connection.',
+      });
     } finally {
       setSigningIn(false);
     }
