@@ -151,5 +151,5 @@ Both contracts are **verified** on Sepolia Etherscan (source is browsable under 
 | App | URL |
 | --- | --- |
 | Backend API | https://staking-dapp-x1az.onrender.com |
-| User frontend | https://kunjicoder-staking-dapp.vercel.app |
-| Admin app | https://staking-dapp-six-rho.vercel.app |
+| User frontend | https://k-staking-dapp.vercel.app |
+| Admin app | https://staking-admin.vercel.app |
