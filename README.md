@@ -117,18 +117,41 @@ npm run dev                    # http://localhost:3001
 | `GET /api/admin/stats` | admin | Totals + 14-day per-day counts and cumulative-staked series |
 | `GET /api/admin/wallet/:address` | admin | Position + activity for one wallet |
 
-## Deployed addresses (fill in)
+## Security considerations
+
+**Secrets & configuration**
+- `.env` files are gitignored — only `.env.example` templates are committed. No secrets live in the repo.
+- `SUPABASE_SERVICE_KEY` is used **server-side only** (it bypasses row-level security) and is never sent to a browser or bundled into the frontends.
+- `JWT_SECRET` must be a long random value, set only on the backend host.
+- Frontends only ever receive `NEXT_PUBLIC_*` values (API URL, public contract addresses, optional RPC) — never service keys or signing secrets.
+
+**Authentication & authorization**
+- Login is Sign-In-With-Ethereum: nonces are single-use with a 5-minute TTL, and the backend verifies the signature, the `chainId` (Sepolia), and the message `domain` against the allow-listed origins.
+- Sessions are 24h JWTs signed with `JWT_SECRET`; every protected route re-verifies the token server-side.
+- Admin access is decided **on the server** from `ADMIN_ADDRESSES` (encoded into the JWT as `role`), never trusted from the client.
+- CORS is restricted to the origins in `FRONTEND_ORIGINS`; the same list drives the SIWE domain check.
+
+**On-chain**
+- The faucet cooldown and all reward accounting are enforced **on-chain**; the backend/UI only read state and cannot grant tokens.
+- Wallet transactions are signed client-side in the user's wallet — the apps never handle private keys.
+
+**Known limitations (by design, testnet demo)**
+- JWTs are stored in `localStorage`, which is readable by JavaScript (XSS exposure) — acceptable for a testnet demo, but a production app should prefer httpOnly cookies.
+- The contracts are **unaudited** and the reward rate (~3154% APR) is a deliberately high demo value, not realistic economics.
+- STK is a **Sepolia testnet** token with no real value; the faucet mints freely within its cooldown.
+
+## Deployed addresses
 
 | What | Value |
 | --- | --- |
-| StakeToken (Sepolia) | `TODO` |
-| Staking (Sepolia) | `TODO` |
-| Deploy block | `TODO` |
+| StakeToken (Sepolia) | `0x8D8450F9a785167dCbE2595475D5c03f0E850cf7` |
+| Staking (Sepolia) | `0x6A6fD4Cf0455E63543f6552083df6F7deb647f7C` |
+| Deploy block | `11044588` |
 
-## Live URLs (fill in)
+## Live URLs
 
 | App | URL |
 | --- | --- |
-| Backend API | `TODO` |
-| User frontend | `TODO` |
-| Admin app | `TODO` |
+| Backend API | https://staking-dapp-x1az.onrender.com |
+| User frontend | https://kunjicoder-staking-dapp.vercel.app |
+| Admin app | https://staking-dapp-six-rho.vercel.app |
